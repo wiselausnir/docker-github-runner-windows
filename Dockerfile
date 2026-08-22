@@ -16,7 +16,9 @@ RUN choco install -y \
     gh \
     powershell-core \
     python \
-    docker-cli
+    docker-cli \
+    7zip \
+    dotnet-6.0-sdk
 
 # Add MSBuild to the path
 RUN [Environment]::SetEnvironmentVariable(\"Path\", $env:Path + \";C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\", \"Machine\")
