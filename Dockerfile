@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/windows/servercore:ltsc2022
 
-ARG RUNNER_VERSION="2.311.0"
+ARG RUNNER_VERSION="2.337.0"
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 
@@ -17,7 +17,14 @@ RUN choco install -y \
     powershell-core \
     python \
     docker-cli \
-    7zip
+    7zip \
+    dotnet-10.0-runtime \
+    dotnet-10.0-aspnetruntime
+
+# Separate layer so this runs in a fresh process that picks up the machine PATH the
+# .NET installer wrote. Fails the build here rather than at BC compile time, where
+# alc.dll is launched via a bare 'dotnet' command if the AL VSIX ships no alc.exe
+RUN dotnet --list-runtimes
 
 # Add MSBuild to the path
 RUN [Environment]::SetEnvironmentVariable(\"Path\", $env:Path + \";C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\", \"Machine\")
