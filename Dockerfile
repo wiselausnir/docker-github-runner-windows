@@ -10,9 +10,12 @@ WORKDIR /actions-runner
 COPY install-choco.ps1 .
 RUN .\install-choco.ps1; Remove-Item .\install-choco.ps1 -Force
 
+# Git is pinned so a rebuild installs exactly this version. 2.56.1 fixes the Git security
+# advisory of 2026-11-10; bump it on the next Git security release.
+RUN choco install -y git --version=2.56.1
+
 # Install dependencies with Chocolatey
 RUN choco install -y \
-    git \
     gh \
     powershell-core \
     python \
@@ -25,6 +28,9 @@ RUN choco install -y \
 # .NET installer wrote. Fails the build here rather than at BC compile time, where
 # alc.dll is launched via a bare 'dotnet' command if the AL VSIX ships no alc.exe
 RUN dotnet --list-runtimes
+
+# Fails the build if the Git on the PATH is not the pinned version
+RUN $v = git --version; Write-Host $v; if ($v -notmatch '2\.56\.1') { throw \"Expected Git 2.56.1, got: $v\" }
 
 # Add MSBuild to the path
 RUN [Environment]::SetEnvironmentVariable(\"Path\", $env:Path + \";C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\", \"Machine\")
