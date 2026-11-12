@@ -14,10 +14,15 @@ RUN .\install-choco.ps1; Remove-Item .\install-choco.ps1 -Force
 # advisory of 2026-11-10; bump it on the next Git security release.
 RUN choco install -y git --version=2.56.1
 
+# PowerShell is pinned to the last version the BC pipelines ran on. The unpinned rebuild of
+# 2026-11-11 installed 7.6.10, after which Expand-Archive failed in 'shell: powershell' steps
+# (Cannot find an overload for "ExtractToDirectory" and the argument count: "3"), because
+# Windows PowerShell loads PowerShell 7's Archive module there. Test a BC compile before bumping.
+RUN choco install -y powershell-core --version=7.6.5
+
 # Install dependencies with Chocolatey
 RUN choco install -y \
     gh \
-    powershell-core \
     python \
     docker-cli \
     7zip \
